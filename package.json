@@ -1,0 +1,33 @@
+{
+  "name": "stencil-highlighter",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "./omp/index.ts",
+  "omp": {
+    "extensions": [
+      "./omp/index.ts"
+    ]
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc -p .",
+    "lint": "biome check .",
+    "format": "biome check --write ."
+  },
+  "peerDependencies": {
+    "@oh-my-pi/pi-coding-agent": "^18.18.3",
+    "@oh-my-pi/pi-tui": "^18.18.3"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.6",
+    "@oh-my-pi/pi-coding-agent": "18.18.5",
+    "@oh-my-pi/pi-tui": "18.18.5",
+    "@types/bun": "1.4.4",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "bun": ">=1.4.4"
+  }
+}
