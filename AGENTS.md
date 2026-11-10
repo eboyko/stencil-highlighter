@@ -17,6 +17,7 @@ One feature in two parts that ship under one version. The Tern window plugin cap
 4. Treat every source attribute value in a batch fence's info string as untrusted. Replace control characters with spaces, collapse whitespace runs, trim and cap each value. Enclose attribute values in double quotes and escape backslashes and double quotes within them. Start the info string with the language and keep it on one line. Use a tilde fence when it contains a backtick, and make the fence longer than every run of its character in the quote.
 5. Send only on explicit request, with steering when idle and a follow-up when busy. Never send on capture, start, session switch or shutdown.
 6. Keep UI strings English and hard-coded. The repository contains no other language. Keep existing strings byte-identical unless the change is about them. User-facing text and the documents use one glossary, and no user message names an internal type.
+7. Version both parts together under Semantic Versioning. Bump the OMP package and the Tern plugin to the same version in one commit, and record every user-visible change in the changelog under its version.
 
 | Contract item           | Value                                                  |
 | ----------------------- | ------------------------------------------------------ |
@@ -29,6 +30,9 @@ One feature in two parts that ship under one version. The Tern window plugin cap
 | Untrusted source values | path, cwd, host, chat title                            |
 | Delivery                | `deliverAs: "steer"` when idle, `"followUp"` when busy |
 | Glossary                | selection, comment, Comments, session                  |
+| Version files           | `package.json`, `tern/plugin.toml`                     |
+| Changelog               | `CHANGELOG.md`                                         |
+| Release tag             | `v<version>`, for example `v0.1.0`                     |
 
 ## Visuals
 
