@@ -1,0 +1,118 @@
+/* Colors, borders, shadows, materials and font sizes stay inherited. Faces come only from SDK font tokens. */
+
+[data-role='stencil-highlighter.comment-input'],
+[data-role='omp.overlay.comments'],
+[data-role='omp.overlay.comments-detail'] {
+	--stencil-highlighter-optical-offset: 1px;
+}
+
+/* Human text uses Tern's configured UI face and the immutable source the pane's terminal face,
+   whatever face the surrounding surface or overlay card sets. A comment is typed and edited in one face. */
+[data-role='stencil-highlighter.comment-input'] .sf-editor,
+[data-role='omp.overlay.comments-detail'] .sf-text,
+[data-role='omp.overlay.comments-detail'] .sf-editor {
+	font-family: var(--sans);
+}
+
+[data-role='stencil-highlighter.detail.source'] {
+	font-family: var(--tv-font, var(--mono));
+}
+
+[data-role='stencil-highlighter.comment-input'] .sf-editor,
+[data-role='omp.overlay.comments-detail'] .sf-editor {
+	padding: 9px 12px 7px;
+}
+
+[data-role='omp.overlay.comments-detail'] .sf-code-lines {
+	padding-top: 9px;
+	padding-bottom: 7px;
+}
+
+[data-role='omp.overlay.comments-detail'] .sf-code-body {
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+[data-role='omp.overlay.comments'] .sf-button > .kbds,
+[data-role='omp.overlay.comments'] .sf-item-label,
+[data-role='omp.overlay.comments'] .sf-item-detail,
+[data-role='omp.overlay.comments'] .sf-item-value,
+[data-role='omp.overlay.comments'] .sf-ov-title,
+[data-role='omp.overlay.comments-detail'] .sf-text {
+	position: relative;
+	top: var(--stencil-highlighter-optical-offset);
+}
+
+/* Caret size follows the field's font, independently of the terminal grid's line height. */
+[data-role='stencil-highlighter.comment-input'] .sf-caret,
+[data-role='omp.overlay.comments-detail'] .sf-caret {
+	height: 1em;
+	transform: translateY(0.15em);
+}
+
+[data-role='stencil-highlighter.detail.source'] .sf-ln,
+[data-role='stencil-highlighter.detail.source'] .sf-gut,
+[data-role='stencil-highlighter.detail.source'] .sf-lt {
+	line-height: 1.25;
+	min-height: 0;
+}
+
+[data-role='stencil-highlighter.detail.footer'] .sf-text {
+	line-height: 1;
+	top: -1.5px;
+}
+
+[data-role='omp.overlay.comments'] [data-role='omp.actions'] .sf-btn-label,
+[data-role='omp.overlay.comments'] [data-role='omp.actions'] [data-role='omp.btn'] .sf-text {
+	line-height: 1;
+	top: 0;
+}
+
+/* One shared content edge; the full-width footer rule keeps its own breathing room. */
+.sf-overlay[data-role='omp.overlay.comments'] {
+	--stencil-highlighter-collection-inset: 16px;
+}
+
+.sf-overlay[data-role='omp.overlay.comments'] > .sf-ov-card > .sf-ov-head,
+.sf-overlay[data-role='omp.overlay.comments'] > .sf-ov-card > .sf-ov-body {
+	padding-left: var(--stencil-highlighter-collection-inset);
+	padding-right: var(--stencil-highlighter-collection-inset);
+}
+
+/* biome-ignore-start lint/complexity/noImportantStyles: native OMP pins its action-bar margins and padding (see README). */
+.sf-overlay[data-role='omp.overlay.comments'] > .sf-ov-card > .sf-ov-body .sf-row[data-role='omp.actions'] {
+	margin-left: calc(-1 * var(--stencil-highlighter-collection-inset)) !important;
+	margin-right: calc(-1 * var(--stencil-highlighter-collection-inset)) !important;
+	padding-top: 12px !important;
+	padding-bottom: 12px !important;
+	padding-left: var(--stencil-highlighter-collection-inset) !important;
+	padding-right: var(--stencil-highlighter-collection-inset) !important;
+}
+/* biome-ignore-end lint/complexity/noImportantStyles: the pinned action-bar override ends here. */
+
+/* A press outside the collection card closes it: the dim stays visual and lets the press through
+   to the full-layer close target, which sits under the raised sheet. */
+[data-role='stencil-highlighter.collection.dismiss'] {
+	position: absolute;
+	inset: 0;
+}
+
+.sf-overlay[data-role='omp.overlay.comments'] {
+	z-index: 1;
+}
+
+.sf-overlay[data-role='omp.overlay.comments'] > .sf-ov-dim {
+	pointer-events: none;
+}
+
+/* Empty guidance occupies the same first row as the source list, including its optical offset.
+   The row metrics copy the SDK list row (13px font, 18px line, 32px height, 7px 10px padding), font-relative
+   where possible so the row scales with the card's font size. An SDK change to list rows needs the same change here. */
+[data-role='omp.overlay.comments'] .sf-list-empty {
+	box-sizing: border-box;
+	min-height: calc(32em / 13);
+	padding: 7px 10px;
+	line-height: calc(18em / 13);
+	position: relative;
+	top: var(--stencil-highlighter-optical-offset);
+}

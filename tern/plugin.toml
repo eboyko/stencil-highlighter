@@ -1,0 +1,7 @@
+schema = 1
+id = "stencil-highlighter"
+name = "Stencil Highlighter"
+version = "0.1.0"
+description = "Comment on a selection in a file, terminal or chat with Alt+C and collect the comments in OMP"
+window = "window.luau"
+styles = ["layout.css"]
