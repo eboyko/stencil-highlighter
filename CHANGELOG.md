@@ -10,6 +10,12 @@ This project follows Semantic Versioning. The OMP package and the Tern plugin al
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-15
+
+### Added
+
+- The Tern plugin captures a selection from a git view. The batch names the open file, the selected commit and a diff flag, and the comment joins the Comments group of that file.
+
 ## [0.1.0] - 2026-11-10
 
 First public release.

@@ -7,8 +7,8 @@ const MAX_SELECTION_CHARS = 64000;
 const MAX_FIELD_LENGTH = 4096;
 /** A longer source value is cut with an ellipsis to keep its label short. */
 const MAX_SOURCE_VALUE = 256;
-const STRING_FIELDS = ["path", "lang", "host", "cwd", "title"] as const;
-const KINDS = new Set<unknown>(["file", "terminal", "chat"]);
+const STRING_FIELDS = ["path", "lang", "host", "rev", "cwd", "title"] as const;
+const KINDS = new Set<unknown>(["file", "git", "terminal", "chat"]);
 
 const MESSAGES = {
 	"invalid-record": "The selection was not received intact. Press Alt+C again",
@@ -34,6 +34,7 @@ interface PaneFields {
 
 export type CaptureSource =
 	| (PaneFields & { kind: "file"; path: string; lines?: LineRange; lang?: string; dirty?: boolean; host?: string })
+	| (PaneFields & { kind: "git"; path: string; lang?: string; rev?: string; diff?: boolean })
 	| (PaneFields & { kind: "terminal" })
 	| (PaneFields & { kind: "chat" });
 
@@ -102,9 +103,11 @@ function assertSource(source: unknown): asserts source is CaptureSource {
 	const strings = STRING_FIELDS.every(key => optional(source[key], isText));
 	const pane = optional(source.pane, value => Number.isSafeInteger(value) && Number(value) >= 0);
 	const dirty = optional(source.dirty, value => typeof value === "boolean");
+	const diff = optional(source.diff, value => typeof value === "boolean");
 	const lines = optional(source.lines, isLineRange);
-	const path = source.kind !== "file" || (typeof source.path === "string" && source.path !== "");
-	if (!strings || !pane || !dirty || !lines || !path) throw new CaptureError("invalid-source");
+	const located = source.kind !== "file" && source.kind !== "git";
+	const path = located || (typeof source.path === "string" && source.path !== "");
+	if (!strings || !pane || !dirty || !diff || !lines || !path) throw new CaptureError("invalid-source");
 }
 
 function assertCapture(value: unknown): asserts value is CaptureRecord {
@@ -158,6 +161,12 @@ function relativePath(path: string, cwd: string | undefined): string {
 	return inside ? rest : path;
 }
 
+/** The commit a git capture shows, by its abbreviated id, or the working tree. */
+export function revision(rev: string | undefined): string {
+	const id = clean(rev ?? "");
+	return id ? `commit ${Array.from(id).slice(0, 12).join("")}` : "working tree";
+}
+
 /** The source as plain text for tooltips, accessibility labels and the terminal fallback. */
 export function sourceLabel(capture: CaptureRecord, titles?: ChatTitles): string {
 	const { source } = capture;
@@ -171,8 +180,14 @@ export function sourceLabel(capture: CaptureRecord, titles?: ChatTitles): string
 		return name ? `Chat · ${name}` : "Chat";
 	}
 
-	const host = clean(source.host ?? "");
 	const path = clean(source.path);
+	if (source.kind === "git") {
+		const view = source.diff ? "Git diff" : "Git";
+		const line = path ? `${view} · ${path}` : view;
+		return `${line} · ${revision(source.rev)}`;
+	}
+
+	const host = clean(source.host ?? "");
 	let line = path ? `File · ${path}${lineRange(source.lines)}` : "File";
 	if (host) line += ` on ${host}`;
 	return source.dirty ? `${line} · unsaved` : line;
@@ -186,15 +201,20 @@ function attribute(name: string, value: string): string {
 
 function info(capture: CaptureRecord, cwd: string, titles: ChatTitles | undefined): string {
 	const { source } = capture;
-	let label = "text";
+	const lang = source.kind === "file" || source.kind === "git" ? (source.lang ?? "") : "";
+	let label = lang && !/[^\w+.-]/.test(lang) ? lang : "text";
 	if (source.kind === "file") {
-		const language = source.lang ?? "";
-		if (language && !/[^\w+.-]/.test(language)) label = language;
 		const host = clean(source.host ?? "");
 		const path = clean(host ? source.path : relativePath(source.path, cwd));
 		if (path) label += ` ${attribute("file", `${path}${lineRange(source.lines)}`)}`;
 		if (host) label += ` ${attribute("host", host)}`;
 		if (source.dirty) label += " unsaved";
+	} else if (source.kind === "git") {
+		const path = clean(relativePath(source.path, cwd));
+		const rev = clean(source.rev ?? "");
+		if (path) label += ` ${attribute("git", path)}`;
+		if (rev) label += ` ${attribute("rev", rev)}`;
+		if (source.diff) label += " diff";
 	} else if (source.kind === "terminal") {
 		const directory = clean(source.cwd ?? "");
 		if (directory) label += ` ${attribute("terminal", directory)}`;

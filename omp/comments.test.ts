@@ -202,8 +202,13 @@ describe("wire boundary", () => {
 			[{ ...capture(), source: { kind: "file", path: "x", lines: { from: 2, to: 1 } } }, "invalid-source"],
 			[{ ...capture(), source: { kind: "file", path: "x".repeat(4097) } }, "invalid-source"],
 			[{ ...capture(), source: { kind: "terminal", cwd: 7 } }, "invalid-source"],
+			[{ ...capture(), source: { kind: "git" } }, "invalid-source"],
+			[{ ...capture(), source: { kind: "git", path: "x", rev: 7 } }, "invalid-source"],
+			[{ ...capture(), source: { kind: "git", path: "x", diff: "yes" } }, "invalid-source"],
 		] as const;
 
+		const git = sourced("git", { kind: "git", path: "/repo/a.ts", lang: "ts", rev: "59751afd", diff: true });
+		expect(parseCapture(JSON.stringify(git)).source).toEqual(git.source);
 		for (const [value, code] of rejected) expect(rejection(value)).toBe(code);
 	});
 
@@ -336,6 +341,20 @@ describe("batch format", () => {
 	test("uses a minimum tilde fence for a file path containing a backtick and a double quote", () => {
 		const record = sourced("file", { kind: "file", path: '/work/a`"b.ts', lang: "ts" });
 		expect(formatBatch([note(record)], "/work")).toBe('~~~ts file="a`\\"b.ts"\nquote\n~~~\nc');
+	});
+
+	test("names a git capture's file, commit and diff view", () => {
+		const commit = sourced("commit", {
+			kind: "git",
+			path: "/work/src/a.ts",
+			lang: "ts",
+			rev: "59751afd",
+			diff: true,
+		});
+		const tree = sourced("tree", { kind: "git", path: "/repo/b.luau" });
+		expect(formatBatch([note(commit), note(tree)], "/work")).toBe(
+			'```ts git="src/a.ts" rev="59751afd" diff\nquote\n```\nc\n\n```text git="/repo/b.luau"\nquote\n```\nc',
+		);
 	});
 
 	test("omits empty attributes after cleaning and resolves live chat names", () => {

@@ -22,7 +22,7 @@ OMP supplies its SDK at run time. Storage uses the SQLite module built into Bun.
 
 | Component | Version or module                                              |
 | --------- | -------------------------------------------------------------- |
-| Tern      | 0.9.12                                                         |
+| Tern      | 0.9.12; git view capture is verified on 0.9.21                 |
 | OMP       | 18.18.3 or a later 18.x release; tests run against SDK 18.18.5 |
 | SQLite    | `bun:sqlite`                                                   |
 
@@ -108,6 +108,13 @@ Select text and press the capture shortcut, or choose the capture command in Ter
 | Session picker placeholder without a selection | Open Comments of which session? |
 
 The capture shortcut without a selection opens the Comments dialog and leaves the layout unchanged. Only a capture moves a glimpse file preview into the layout, which keeps that preview open.
+
+A selection in a git view is captured too. Tern copies only the code column of a git view, without line numbers and without the plus and minus markers. A diff quote therefore mixes removed and added lines. The source names the file open in the git view, the selected commit, and whether the view shows a diff. Without a selected commit, the source is the working tree, staged or not; Tern does not tell the two apart. A git comment joins the Comments group of the same file.
+
+| Situation in the git view                           | Error toast text                                      |
+| --------------------------------------------------- | ----------------------------------------------------- |
+| No file is open                                     | Open a file in the git view and select its code       |
+| Neither the working tree nor one commit is selected | Select the working tree or one commit in the git view |
 
 A session without the OMP extension produces an error, never a success notification. Only the OMP extension acknowledges that a comment is saved.
 
@@ -269,6 +276,7 @@ The Tern plugin dispatches actions to a native button in the OMP composer of the
 | Record fields          | `v`, `id`, `source`, `text`, `clipped`                    |
 | Fields of every source | `kind`, `pane`, `title`, `cwd`                            |
 | File-only fields       | `path`, `lines`, `lang`, `dirty`, `host`                  |
+| Git-only fields        | `path`, `lang`, `rev`, `diff`                             |
 | File range             | `source.lines = { from, to }`                             |
 
 Captured quotes are immutable. The capture parser bounds the capture id to at most 256 characters. It requires the source pane to be a nonnegative safe integer. Both values become storage and native node keys. Every source string field is bounded as well. A rejected record yields a stable reason code, and the error toast shows the reason's message after the Comments prefix. An add action without a record is rejected before parsing.
@@ -332,6 +340,11 @@ comment
 quoted text
 ```
 comment
+
+```ts git="src/app.ts" rev="59751afdd72fa27f2ad2efba8e329d674c628b80" diff
+quoted diff lines
+```
+comment
 ````
 
 The opening fence starts with the language, followed by space-separated source attributes. Tern displays only the language in its code head and uses it for syntax highlighting. The agent receives the attributes in raw Markdown.
@@ -341,19 +354,22 @@ The opening fence starts with the language, followed by space-separated source a
 | File     | `<lang> file="<path><range>" host="<host>" unsaved clipped` |
 | Terminal | `text terminal="<directory>" clipped`                       |
 | Chat     | `text chat="<name>" clipped`                                |
+| Git view | `<lang> git="<path>" rev="<commit>" diff clipped`           |
 
 Attributes appear in the order shown. Unknown or empty values are omitted. The clipping flag is always last.
 
-| Part      | Present when                                  | Value                                                                                             |
-| --------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| Language  | Always                                        | The file capture's language matching `^[\w+.-]+$`, otherwise `text`; terminal and chat use `text` |
-| Path      | The file path is nonempty after cleaning      | Relative to the OMP session's directory for a local file strictly inside it, otherwise absolute   |
-| Range     | The file capture has a line range             | `:5` for one line, `:3-4` for several                                                             |
-| Host      | The file is remote                            | The host name                                                                                     |
-| Unsaved   | The file buffer is dirty                      | `unsaved`                                                                                         |
-| Directory | The terminal pane reports a working directory | The directory                                                                                     |
-| Name      | The chat has a live or captured name          | The name resolved by the Source names rules                                                       |
-| Clipped   | The quote is clipped                          | `clipped`                                                                                         |
+| Part      | Present when                                  | Value                                                                                                    |
+| --------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Language  | Always                                        | The file or git capture's language matching `^[\w+.-]+$`, otherwise `text`; terminal and chat use `text` |
+| Path      | The file path is nonempty after cleaning      | Relative to the OMP session's directory for a local file strictly inside it, otherwise absolute          |
+| Range     | The file capture has a line range             | `:5` for one line, `:3-4` for several                                                                    |
+| Host      | The file is remote                            | The host name                                                                                            |
+| Commit    | The git view shows a selected commit          | The full commit id                                                                                       |
+| Diff      | The git view shows a diff                     | `diff`                                                                                                   |
+| Unsaved   | The file buffer is dirty                      | `unsaved`                                                                                                |
+| Directory | The terminal pane reports a working directory | The directory                                                                                            |
+| Name      | The chat has a live or captured name          | The name resolved by the Source names rules                                                              |
+| Clipped   | The quote is clipped                          | `clipped`                                                                                                |
 
 Every source value is untrusted. Control characters become spaces, whitespace runs collapse to one space, and the value is trimmed. Values above the limit end with an ellipsis before escaping. Each attribute value is enclosed in double quotes. Within those quotes, backslashes and double quotes are escaped as follows.
 
@@ -596,6 +612,7 @@ Run these checks in a real Tern window. A complete run of this checklist in a Te
 16. Make two ranges in one file and press the capture shortcut. The capture must be rejected with the one-continuous-selection reason.
 17. Capture a line near the end of a file with several hundred thousand lines. The capture must succeed without a budget pause of the capture command.
 18. Inspect the detail sheet's side insets and footer padding against the Comments dialog.
+19. Open a git view, open a changed file of the working tree, select diff lines and press the capture shortcut. Repeat with a file of one selected commit. The batch must carry the file path, the commit id for the second capture, and the diff flag for both.
 
 | Step | Literal        |
 | ---- | -------------- |

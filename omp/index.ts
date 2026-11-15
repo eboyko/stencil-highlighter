@@ -32,6 +32,7 @@ import {
 	lineRange,
 	type Note,
 	parseCapture,
+	revision,
 	sendBatch,
 	sourceLabel,
 } from "./comments";
@@ -65,15 +66,17 @@ function compactSource(note: Note, titles: ChatTitles): string {
 	const { source } = note.capture;
 	if (source.kind === "terminal") return "Terminal";
 	if (source.kind === "chat") return chatName(note.capture, titles) || "Chat";
-	return fileName(source.path) + lineRange(source.lines);
+	return fileName(source.path) + (source.kind === "file" ? lineRange(source.lines) : "");
 }
 
 function fileName(path: string): string {
 	return path.slice(path.search(/[^/\\]*$/));
 }
 
+/** A git capture names a local file, so it joins that file's group. */
 function sourceGroup(note: Note): string {
 	const source = note.capture.source;
+	if (source.kind === "git") return JSON.stringify(["file", "", source.path]);
 	if (source.kind !== "file") return JSON.stringify([source.kind]);
 	return JSON.stringify([source.kind, source.host ?? "", source.path]);
 }
@@ -370,6 +373,7 @@ export class Collection {
 			const facts = [
 				source.kind === "file" && source.dirty ? "Unsaved file" : "",
 				source.kind === "file" ? (source.host ?? "") : "",
+				source.kind === "git" ? `${source.diff ? "Diff" : "Git"} · ${revision(source.rev)}` : "",
 				selected.capture.clipped ? "Selection clipped" : "",
 			].filter(Boolean);
 
@@ -382,7 +386,7 @@ export class Collection {
 							role: "stencil-highlighter.detail.source",
 							start: quote.start,
 							marks: quote.kind === "context" ? quote.marks : undefined,
-							lang: source.kind === "file" ? source.lang : undefined,
+							lang: source.kind === "file" || source.kind === "git" ? source.lang : undefined,
 							numbers: source.kind === "file" && !!source.lines,
 							wrap: true,
 							preview: { lines: 8 },
@@ -586,8 +590,9 @@ export class Collection {
 			}
 
 			const source = note.capture.source;
-			if (source.kind === "file") {
-				const label = fileName(source.path) + (source.host ? ` · ${source.host}` : "");
+			if (source.kind === "file" || source.kind === "git") {
+				const host = source.kind === "file" ? source.host : undefined;
+				const label = fileName(source.path) + (host ? ` · ${host}` : "");
 				sources.set(id, { id, label, count: 1, path: source.path, icon: "file" });
 				continue;
 			}

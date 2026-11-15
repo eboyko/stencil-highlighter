@@ -362,6 +362,37 @@ local function captureFailure(cx: WindowCx, reason: any)
 	cx:toast("error", "Could not read the selection", message)
 end
 
+-- A git view copies its code column only: no line numbers and no +/- markers, so a diff quote mixes
+-- removed and added lines. The source names the open file, its commit and whether a diff is shown.
+local function describeGit(cx: WindowCx, pane: number, source: { [string]: any })
+	local state = cx.session:read(pane, { as = "table", from = 1, lines = 1, rows = 1, max_chars = 1 })
+	local open = type(state) == "table" and state.kind == "git" and state.open
+	local root = type(state) == "table" and state.root
+	local file = type(open) == "table" and type(open.path) == "string" and open.path ~= ""
+	if not file or type(root) ~= "string" or root == "" then
+		error("Open a file in the git view and select its code", 0)
+	end
+
+	local view = state.selection
+	local commits = type(view) == "table" and view.kind == "commits" and type(view.ids) == "table"
+	if commits and #view.ids == 1 and type(view.ids[1]) == "string" then
+		source.rev = view.ids[1]
+	elseif type(view) ~= "table" or view.kind ~= "wip" then
+		error("Select the working tree or one commit in the git view", 0)
+	end
+
+	source.kind = "git"
+	source.path = root .. "/" .. open.path
+	local extension = string.match(open.path, "%.([%w_+-]+)$")
+	if extension then
+		source.lang = string.lower(extension)
+	end
+
+	if open.mode == "diff" then
+		source.diff = true
+	end
+end
+
 local function capture(cx: WindowCx, pane: PaneInfo)
 	local selection = cx.session:selection(pane.pane, { max_chars = MAX_CHARS })
 	if not selection or selection.text == "" then
@@ -379,6 +410,8 @@ local function capture(cx: WindowCx, pane: PaneInfo)
 		source.kind = "chat"
 	elseif pane.kind == "terminal" then
 		source.kind = "terminal"
+	elseif pane.kind == "git" then
+		describeGit(cx, pane.pane, source)
 	else
 		error("Selections in this pane type are not supported yet: " .. tostring(pane.kind), 0)
 	end
