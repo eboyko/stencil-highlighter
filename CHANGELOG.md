@@ -10,6 +10,12 @@ This project follows Semantic Versioning. The OMP package and the Tern plugin al
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-18
+
+### Fixed
+
+- Alt+C uses the physical C key, so switching keyboard layouts no longer changes the capture shortcut.
+
 ## [0.2.0] - 2026-11-15
 
 ### Added

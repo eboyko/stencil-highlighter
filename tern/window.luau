@@ -521,7 +521,7 @@ tern.timer(0, watchTitles)
 
 -- Module-level registration also runs when the plugin is reloaded in an existing window.
 -- A user/preset binding can take Alt+C; the palette command remains available.
-tern.command({ id = "capture", title = "Comment on selection", keys = { "alt+c" }, run = run })
+tern.command({ id = "capture", title = "Comment on selection", keys = { "alt+key_c" }, run = run })
 tern.on("focus", function(ev: FocusEvent, cx: WindowCx)
 	rememberFocus(cx, ev.pane, ev.tab)
 end)

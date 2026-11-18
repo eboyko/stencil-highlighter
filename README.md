@@ -239,7 +239,7 @@ Outside Tern, the same independent editor and the stock select list render in th
 
 ## Keyboard
 
-The capture shortcut is a Tern shortcut. OMP has no separate chat-capture shortcut. To change the shortcut, bind the capture command to another chord in Tern's keyboard settings. A user binding or keymap preset can take the default chord, and the command palette entry stays available.
+The capture shortcut uses Alt and the physical C key (`alt+key_c` in Tern), regardless of the active keyboard layout. OMP has no separate chat-capture shortcut. To change the shortcut, bind the capture command to another chord in Tern's keyboard settings. A user binding or keymap preset can take the default chord, and the command palette entry stays available.
 
 | Item             | Value                                |
 | ---------------- | ------------------------------------ |
