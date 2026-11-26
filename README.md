@@ -1,6 +1,6 @@
 # Stencil Highlighter
 
-Stencil Highlighter collects comments on text selected in Tern and sends them to an OMP agent as one message. It is one feature in two parts. Both parts share version 0.3.0, which is unreleased.
+Stencil Highlighter collects comments on text selected in Tern and sends them to an OMP agent as one message. It is one feature in two parts. Both parts share version 0.3.0.
 
 | Part               | Directory | Install on                              | Responsibility                                                       |
 | ------------------ | --------- | --------------------------------------- | -------------------------------------------------------------------- |
@@ -297,7 +297,7 @@ Captured quotes are immutable. The capture parser bounds the capture id to at mo
 | Add action without a value | The selection was not received. Press Alt+C again                                                        |
 | Source string field limit  | 4,096 characters                                                                                         |
 
-In the unreleased 0.3.0 migration to OMP 19.2, the extension uses a keyed widget below the editor instead of replacing the composer. It registers the right-aligned Comments button on main-session start, switch and branch. Registering the same key replaces its previous control without affecting other extensions. On a session change the extension closes any open dialog and refreshes the count. It never reads, replaces or sends the composer draft.
+The extension uses a keyed widget below the OMP editor instead of replacing the composer. It registers the right-aligned Comments button on main-session start, switch and branch. Registering the same key replaces its previous control without affecting other extensions. On a session change the extension closes any open dialog and refreshes the count. It never reads, replaces or sends the composer draft.
 
 If another extension cancels a session switch after OMP has cleared its widgets, Stencil Highlighter restores the Comments button in the original session. Capture remains available there without restarting OMP or changing the composer draft.
 

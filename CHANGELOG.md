@@ -8,7 +8,9 @@ This project follows Semantic Versioning. The OMP package and the Tern plugin al
 | Tern plugin version | `tern/plugin.toml`     |
 | Format              | Keep a Changelog 1.1.0 |
 
-## [0.3.0] - Unreleased
+## [Unreleased]
+
+## [0.3.0] - 2026-11-26
 
 ### Changed
 

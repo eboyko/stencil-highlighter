@@ -2,7 +2,7 @@
 
 | Item            | Version or status                                 |
 | --------------- | ------------------------------------------------- |
-| Project         | 0.3.0, unreleased                                 |
+| Project         | 0.3.0                                             |
 | Supported OMP   | `^19.2.0` (19.2.0 to below 20.0.0)                |
 | Development SDK | OMP 19.2.0                                        |
 | Verified Tern   | 0.9.35; a minimum Tern version is not established |
