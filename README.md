@@ -60,6 +60,13 @@ New OMP sessions load the extension automatically through the extensions entry o
 
 A link follows changes in the checkout. Do not move or delete the checkout while using it.
 
+If capture reports a missing extension, run the plugin health check on the host running OMP. An orphan warning means the enabled package is missing. If you moved the checkout, link its new location and start a fresh OMP process.
+
+```sh
+omp plugin doctor
+omp plugin link "$PWD" --scope user
+```
+
 After changing extension source, start a fresh OMP process. The OMP plugin reload command refreshes the plugin catalog but does not replace a module that is already imported. After changing Tern plugin files, reload the Tern plugin.
 
 | Command                                  | Effect                                                       |
