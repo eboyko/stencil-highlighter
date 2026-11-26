@@ -90,11 +90,17 @@
 }
 /* biome-ignore-end lint/complexity/noImportantStyles: the pinned action-bar override ends here. */
 
-/* A press outside the collection card closes it: the dim stays visual and lets the press through
-   to the full-layer close target, which sits under the raised sheet. */
-[data-role='stencil-highlighter.collection.dismiss'] {
+/* The dock contributes a full-layer click target behind the collection sheet. It is an overlay
+   so OMP hoists it to the layer; only the real sheet draws a card and a dim. */
+.sf-overlay[data-role='stencil-highlighter.collection.dismiss'] {
 	position: absolute;
 	inset: 0;
+	pointer-events: auto;
+}
+
+.sf-overlay[data-role='stencil-highlighter.collection.dismiss'] > .sf-ov-card,
+.sf-overlay[data-role='stencil-highlighter.collection.dismiss'] > .sf-ov-dim {
+	display: none;
 }
 
 .sf-overlay[data-role='omp.overlay.comments'] {

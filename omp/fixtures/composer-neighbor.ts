@@ -1,32 +1,30 @@
-import { CustomEditor, type ExtensionAPI, type ExtensionContext } from "@oh-my-pi/pi-coding-agent";
-import { node } from "@oh-my-pi/pi-tui";
+import type { ExtensionAPI, ExtensionContext } from "@oh-my-pi/pi-coding-agent";
+import { UiNode } from "@oh-my-pi/pi-tui";
 
-type EditorFactory = NonNullable<Parameters<ExtensionContext["ui"]["setEditorComponent"]>[0]>;
-
-/**
- * Another composer extension for the chaining tests. Like real neighbours (the English tutor),
- * it wraps the factory OMP keeps for the whole process once, on the first main session, and
- * adds its own control to the composer line.
- */
+/** A second extension that owns a different widget below the same editor. */
 export default function composerNeighbor(pi: ExtensionAPI): void {
-	let wrapped = false;
+	let veto = false;
 	const sessionChanged = (_event: unknown, ctx: ExtensionContext) => {
-		if (wrapped || ctx.agent.kind !== "main" || !ctx.hasUI) return;
-		wrapped = true;
-		const base: EditorFactory | undefined = ctx.ui.getEditorComponent();
-		ctx.ui.setEditorComponent((...args: Parameters<EditorFactory>) => {
-			const current = base?.(...args) ?? new CustomEditor(...args);
-			const layout = current.describeLayout.bind(current);
-			current.describeLayout = (...params) => {
-				const original = layout(...params);
-				const badge = node("button", { key: "neighbor", text: "N", variant: "quiet" }, undefined, "neighbor");
-				return { ...original, children: [...original.children, badge] };
-			};
-
-			return current;
+		if (ctx.agent.kind !== "main" || !ctx.hasUI) return;
+		ctx.ui.setWidget("neighbor", () => new UiNode("button", { key: "neighbor", text: "N", variant: "quiet" }), {
+			placement: "belowEditor",
 		});
 	};
 
+	pi.registerCommand("neighbor-switch", {
+		description: "Exercise another extension's session-switch action",
+		handler: async (args, ctx) => {
+			veto = args === "cancel";
+			try {
+				await ctx.switchSession("neighbor-session.json");
+			} finally {
+				veto = false;
+				// The initiating extension can restore its own widget from the action result.
+				sessionChanged(undefined, ctx);
+			}
+		},
+	});
+	pi.on("session_before_switch", () => (veto ? { cancel: true } : undefined));
 	pi.on("session_start", sessionChanged);
 	pi.on("session_switch", sessionChanged);
 	pi.on("session_branch", sessionChanged);

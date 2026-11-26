@@ -8,7 +8,18 @@ This project follows Semantic Versioning. The OMP package and the Tern plugin al
 | Tern plugin version | `tern/plugin.toml`     |
 | Format              | Keep a Changelog 1.1.0 |
 
-## [Unreleased]
+## [0.3.0] - Unreleased
+
+### Changed
+
+- Supports OMP `^19.2.0` (19.2.0 to below 20.0.0). The Comments button is a right-aligned keyed widget below the editor, so other extensions can add controls without replacing it or the composer.
+- Tern 0.9.35 is the verified version for this migration, not an established minimum requirement.
+
+### Fixed
+
+- Restored the Comments button and capture in the original session when another extension cancels a session switch, regardless of extension order.
+- Preserved Tern's native pinned action row in the Comments dialog.
+- Preserved the Edit and Send all shortcut hints and used the host's key formatter for their tooltips.
 
 ## [0.2.1] - 2026-11-18
 

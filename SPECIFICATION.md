@@ -1,8 +1,11 @@
 # Stencil Highlighter — schematic design specification
 
-| Status                       | Tern   | OMP     |
-| ---------------------------- | ------ | ------- |
-| Implementation specification | 0.9.12 | 18.18.3 |
+| Item            | Version or status                                 |
+| --------------- | ------------------------------------------------- |
+| Project         | 0.3.0, unreleased                                 |
+| Supported OMP   | `^19.2.0` (19.2.0 to below 20.0.0)                |
+| Development SDK | OMP 19.2.0                                        |
+| Verified Tern   | 0.9.35; a minimum Tern version is not established |
 
 Stencil Highlighter adds a comment to a selection in Tern and passes it to the OMP extension. The OMP extension is part of this repository. Its Comments dialog is a standard SDK overlay with files on the left and comments in the center. Editing happens in a separate full-size sheet.
 
@@ -49,7 +52,9 @@ flowchart LR
 | Stencil Highlighter plugin | The computer running the Tern window | The only component with access to the selection, the focus and the window layout                    |
 | OMP extension              | The OMP host                         | Stores comments, shows the input field and the Comments dialog, and builds the message to the agent |
 
-The plugin reaches the OMP extension through an event. The event goes to the extension's Comments button in the OMP input line of the same tab.
+The plugin reaches the OMP extension through an event. The event goes to the extension's Comments button in a right-aligned keyed widget below the OMP editor of the same tab. The extension does not replace or chain the composer.
+
+OMP clears widgets before asking extensions whether a session switch may proceed. If another extension cancels the switch, Stencil Highlighter restores its keyed widget in the original session, including when that extension runs first. A cancelled switch must not leave capture unavailable or require an OMP restart.
 
 | Link    | Value            |
 | ------- | ---------------- |
@@ -83,8 +88,9 @@ The wireframes show layout, not color. The active Tern theme sets the colors. Ea
 │                           │ 11  ░░░░if not session then░░         │
 │                           │ 12      return                        │
 │ ╭───────────────────────╮ │                                       │
-│ │ draft…           [✉ 2]│ │                                       │  [✉ 2] Comments badge
-│ ╰───────────────────────╯ │                                       │  (omp.btn button, neutral tone)
+│ │ draft…                │ │                                       │
+│ ╰───────────────────────╯ │                                       │
+│                     [✉ 2] │                                       │  Right-aligned Comments widget below the draft
 └───────────────────────────┴───────────────────────────────────────┘
 ```
 
@@ -244,7 +250,7 @@ Capture check errors share one notification title. Hand-off errors have their ow
 | No OMP session       | none                  | the tab has no session with the OMP extension                                                | No OMP session available in this tab                    | Open OMP with the stencil-highlighter extension                                                                                         |
 | No Comments button   | none                  | the session has no Comments button                                                           | Stencil Highlighter extension not found in this session | Open OMP with the stencil-highlighter extension and press Alt+C again                                                                   |
 
-The Comments dialog is a standard SDK overlay with two identical lists. The left list shows files with counters. The center list shows exactly one row per comment. Each row holds the comment text and the file location, without a second quote line. The shared list primitive gives both lists the same row heights and top padding. There is no separate vertical divider. One file entry groups all of its ranges. Files with identical names are distinguished by path. Remote hosts are not mixed with local ones. Terminal and chat are separate sources. The all-sources entry shows the whole batch. When the width is insufficient, the SDK wraps the columns.
+The Comments dialog is a standard SDK overlay with two manually composed `list/item` columns, not the SDK `Collection` component. The left list shows files with counters. The center list shows exactly one row per comment. Each row holds the comment text and the file location, without a second quote line. The shared list primitive gives both lists the same row heights and top padding. There is no separate vertical divider. One file entry groups all of its ranges. Files with identical names are distinguished by path. Remote hosts are not mixed with local ones. Terminal and chat are separate sources. The all-sources entry shows the whole batch. When the width is insufficient, the SDK wraps the columns.
 
 Clicking a comment opens the detail sheet, a full-size modal SDK overlay. Enter and the edit action open it too. The sheet has a header row with the location and an Esc keycap, then the quote, then the comment editor, then a footer bar with the delete control. The terminal fallback uses the same quote-first order. Focus stays on the editor. The sheet has no quote, comment or new-line labels. The editor has a three-line minimum and scrolls after eight lines.
 
@@ -344,24 +350,24 @@ The README's Batch format section defines attribute order, source-value cleaning
 | -------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | Comment field        | Untitled overlay, `anchor: center`, role `stencil-highlighter.comment-input`                          | One outer frame; no title, quote, buttons or counter; placeholder “Comment…”                               |
 | Capture error        | Tern system notification, `error` tone                                                                | Title and one reason line                                                                                  |
-| Comments badge       | `message` icon button in the OMP input line                                                           | Comment counter; tone `muted` with no comments, `neutral` otherwise                                        |
+| Comments badge       | Right-aligned `message` icon button in a keyed widget below the OMP editor                            | Comment counter; tone `muted` with no comments, `neutral` otherwise                                        |
 | Recipient choice     | Tern choice palette                                                                                   | “Which session gets the comment?”, or “Open Comments of which session?” without a selection                |
 | Comments and editing | SDK overlay with two `list/item` lists; for editing, a full-size `overlay` sheet with code and Editor | Identical rows on the left and right; content panel without extra labels; context only on a verified match |
 
 Colors, lines and materials come from the active theme through SDK tokens.
 
-The SDK sets colors, backgrounds, borders, shadows, blur and opacity. Typefaces come from SDK font tokens. Transparency enabled in Tern is preserved. The plugin does not turn on transparency that is disabled. No font family is hard-coded, and materials are not overridden. Human-readable text in the comment field and the detail sheet uses the sans-serif UI token of the theme. The quote uses the pane's terminal font token. Keycaps keep the SDK typography. The quote's reduced size is the one typographic choice of the stylesheet.
+The SDK sets colors, backgrounds, borders, shadows, blur and opacity. Typefaces come from SDK font tokens. Transparency enabled in Tern is preserved. The plugin does not turn on transparency that is disabled. No font family is hard-coded, and materials are not overridden. Human-readable text in the comment field and the detail sheet uses the sans-serif UI token of the theme. The quote uses the pane's terminal font token at an inherited size. Keycaps keep the SDK typography.
 
-The detail sheet fills the pane. Its header row shows the source on one line and an Esc keycap at the right. The Editor follows, then the read-only quote. The comment therefore comes before the source text. The Esc keycap is clickable and has no visible label. The footer bar holds the delete control at the right. The detail sheet does not change the Comments dialog or the comment field.
+The detail sheet fills the pane. Its header row shows the source on one line and an Esc keycap at the right. The read-only quote follows, then the Editor. The source text therefore comes before the comment in native Tern and in the terminal fallback. The Esc keycap is clickable and has no visible label. The footer bar holds the delete control at the right. The detail sheet does not change the Comments dialog or the comment field.
 
-The Comments dialog has its own Esc to the right of its title. That Esc sits in the standard end slot of the SDK overlay. The dialog's bottom buttons do not inherit the label lift of the detail footer. Their capsules and capsule metrics are unchanged.
+The Comments dialog has its own Esc to the right of its title. That Esc sits in the standard end slot of the SDK overlay. Its action row is the last direct child of the body column, preserving Tern's native pinned action-row selector. Edit and Send all keep their shortcut hints and use the host's key formatter in tooltips. The dialog's bottom buttons do not inherit the label lift of the detail footer. Their capsules and capsule metrics are unchanged.
 
 Rows that name a text size or a pixel height record native measurements from earlier passes. They were not re-measured against the current stylesheet.
 
 | Element                                  | Value                                                                                                  |
 | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | UI token for human-readable text         | `--sans`                                                                                               |
-| Working collection component             | `Collection`                                                                                           |
+| Working collection components            | Manually composed SDK `list/item` columns inside an `overlay`                                          |
 | Detail sheet width                       | full pane width, `size: "full"`                                                                        |
 | Editor height in the detail sheet        | at least three lines; scrolls after eight                                                              |
 | Quote font size                          | inherited                                                                                              |
@@ -442,7 +448,19 @@ A chat selection has no message or author identifier. Capture saves the exact re
 
 ### Implementation verification
 
-A full visual run in the Tern window is not confirmed. Window control scenarios hung in this environment while waiting for frames. Checks of the native component structure do not replace the visual acceptance in section 13. Native frame replays are not screenshots of a macOS window. Only the review-fix rows were run for this revision. The other rows record earlier passes.
+The migration checks and the later review fixes were verified separately. Neither run covers the full real-window checklist in section 13.
+
+| Pass                        | Environment                          | Verified                                                                                                                                                         |
+| --------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.3.0 migration, prior pass | Focused OMP tests                    | 15 tests passed                                                                                                                                                  |
+| 0.3.0 migration, prior pass | Type check and formatter checks      | Passed against the OMP 19.2.0 development SDK                                                                                                                    |
+| 0.3.0 migration, prior pass | Real native Tern, disposable profile | Selected file bytes 0–9 with Alt+C; saved a comment; verified the original source path and exact quote in the database; opened the Comments list and detail view |
+
+After the review fixes, 19 extension tests passed against the OMP 19.2.0 development SDK. In Tern 0.9.35 with OMP 19.2.1, another extension cancelled a session change before the highlighter received the switch event. The capture command saved the exact selection and source path in the original session. Alt+C also opened the comment field. With 33 comments, scrolling moved the list while the action row stayed in place. The Edit and Send all tooltips displayed the host's shortcut symbols. Outside-click close remains unconfirmed.
+
+### Earlier verification records
+
+The rows below describe older implementations and SDK versions. They are historical results, not verification of 0.3.0. Earlier window-control scenarios hung while waiting for frames; headless checks and native frame replays were recorded separately from real-window tests.
 
 | Pass                         | Environment                                                                                                                                              | Verified                                                                                                                                                                                                          |
 | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,7 +1,7 @@
 schema = 1
 id = "stencil-highlighter"
 name = "Stencil Highlighter"
-version = "0.2.1"
+version = "0.3.0"
 description = "Comment on a selection in a file, git view, terminal or chat with Alt+C and collect the comments in OMP"
 window = "window.luau"
 styles = ["layout.css"]

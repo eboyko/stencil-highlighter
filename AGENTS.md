@@ -11,7 +11,7 @@ One feature in two parts that ship under one version. The Tern window plugin cap
 
 ## Contracts
 
-1. The parts communicate only through CaptureRecord v1 and one native composer button with three actions. Land a change on one side with the matching change on the other side, in the same commit.
+1. The parts communicate only through CaptureRecord v1 and one native button with three actions. OMP mounts the button as a right-aligned keyed widget below the editor, without replacing or chaining the composer. Land a change on one side with the matching change on the other side, in the same commit.
 2. Keep every stable identifier unchanged. The package name, the plugin id, the command id, the UI node ids and the storage directory derive from one name. Renaming any identifier breaks user bindings or data.
 3. Captured quotes are immutable and sent byte-exact.
 4. Treat every source attribute value in a batch fence's info string as untrusted. Replace control characters with spaces, collapse whitespace runs, trim and cap each value. Enclose attribute values in double quotes and escape backslashes and double quotes within them. Start the info string with the language and keep it on one line. Use a tilde fence when it contains a backtick, and make the fence longer than every run of its character in the quote.
@@ -124,7 +124,7 @@ Formatters own indentation, spacing inside lines and wrapping. After any edit, b
 ## Tests
 
 1. Bun test covers the OMP extension. The Luau tests run under the standalone Luau CLI, so the file-selection module receives the Tern API as an argument.
-2. Tests pin user-visible behaviour: storage, deduplication, batch format and escaping, admission and deletion, delivery mode, dialog state, and composer chaining through the composer fixture. Do not test wording or wiring.
+2. Tests pin user-visible behaviour: storage, deduplication, batch format and escaping, admission and deletion, delivery mode, dialog state, and keyed-widget coexistence through the neighbour fixture. Check both registration orders, completed session transitions and cancelled switches without replacing the composer. Do not test wording or wiring.
 3. Tell failure reasons apart by their stable codes, never by message text.
 4. The native sheet ids block in the extension test is the one sanctioned SDK-dependency guard. It pins the wiring that the outside-click close depends on.
 5. Real-window checks follow the README's manual checklist. A unit test that calls the add action directly exercises neither capture nor window-to-OMP dispatch.
@@ -133,7 +133,7 @@ Formatters own indentation, spacing inside lines and wrapping. After any edit, b
 | --------------------- | --------------------------------------------- |
 | Luau tests            | `tern/*.test.luau`                            |
 | File-selection module | `tern/file-selection.luau`                    |
-| Composer fixture      | `omp/fixtures/composer-neighbor.ts`           |
+| Neighbour fixture     | `omp/fixtures/composer-neighbor.ts`           |
 | Add action            | `comments.add`                                |
 | Failure codes         | `CaptureError.code`, Luau `{ code, message }` |
 | SDK-dependency guard  | `native sheet ids` in `omp/index.test.ts`     |
