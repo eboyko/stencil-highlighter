@@ -65,7 +65,7 @@
 [data-role='omp.overlay.comments'] [data-role='omp.actions'] .sf-btn-label,
 [data-role='omp.overlay.comments'] [data-role='omp.actions'] [data-role='omp.btn'] .sf-text {
 	line-height: 1;
-	top: 0;
+	transform: translateY(0.5px);
 }
 
 /* One shared content edge; the full-width footer rule keeps its own breathing room. */

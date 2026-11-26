@@ -380,7 +380,7 @@ Rows that name a text size or a pixel height record native measurements from ear
 | Header Esc tooltip and accessible name   | Back to list (Esc); Back to list                                                                       |
 | Comments dialog title                    | Comments                                                                                               |
 | Comments dialog Esc slot                 | `end` slot of the SDK overlay                                                                          |
-| Comments dialog bottom buttons           | single-line line spacing, zero vertical offset                                                         |
+| Comments dialog bottom buttons           | single-line labels lowered by 0.5 design pixels; button bounds and shortcut hints stay in place        |
 | Comments dialog side padding             | 16 design pixels for the title and top Esc, the outer list edges and the outermost buttons             |
 | Space above and below the footer buttons | 12 px each, close to the density of native pop-ups                                                     |
 | List rows                                | 32 px in both columns, same top coordinate                                                             |

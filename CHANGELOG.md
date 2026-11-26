@@ -20,6 +20,7 @@ This project follows Semantic Versioning. The OMP package and the Tern plugin al
 - Restored the Comments button and capture in the original session when another extension cancels a session switch, regardless of extension order.
 - Preserved Tern's native pinned action row in the Comments dialog.
 - Preserved the Edit and Send all shortcut hints and used the host's key formatter for their tooltips.
+- Lowered the labels on the Comments footer buttons to center them within their outlines.
 
 ## [0.2.1] - 2026-11-18
 
